@@ -1,7 +1,10 @@
 package com.example.adivinarpalabraindividualv2;
 
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -77,15 +80,79 @@ public class Formulario extends AppCompatActivity {
     }
 
     public void insertarPalabraSQL(View view) {
+        AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "bdPalabras", null, 1);
+        SQLiteDatabase BaseDeDatos = admin.getWritableDatabase();
 
+        if (!palabraET.equals("") && !descripcionET.equals("")) {
+            ContentValues registro = new ContentValues();
+            registro.put("nombre", palabraET.getText().toString());
+            registro.put("descripcion", descripcionET.getText().toString());
+
+            BaseDeDatos.insert("tablaPalabras", null, registro);
+            BaseDeDatos.close();
+            borrarCamposPalabra();
+
+            Cursor palabraSQL = BaseDeDatos.rawQuery("select nombre" +
+                    " from palabras where nombre = " + palabraET.getText().toString(), null);
+            Cursor descripcionSQL = BaseDeDatos.rawQuery("select descripcion" +
+                    " from palabras where nombre = " + descripcionET.getText().toString(), null);
+
+            /*if (palabraSQL.moveToFirst() && descripcionSQL.moveToFirst()) {
+                //se hace la inserccion
+                //palabraSQL.getString(0);
+                //descripcionSQL.getString(1);
+                //BaseDeDatos.close();
+            } else {
+                System.out.println("No existe la palabra");
+            }*/
+
+            Toast.makeText(this, "La palabra se ha insertado correctamente", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Debes rellenar todos los campos", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void modificarPalabraSQL(View view) {
+        AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "bdPalabras", null, 1);
+        SQLiteDatabase BaseDeDatos = admin.getWritableDatabase();
 
+        if (!palabraET.equals("") && !descripcionET.equals("")) {
+            ContentValues registro = new ContentValues();
+            registro.put("nombre", palabraET.getText().toString());
+            registro.put("descripcion", descripcionET.getText().toString());
+
+            int cantidad = BaseDeDatos.update("tablaPalabras", registro,
+                    "nombre = " + palabraET.getText().toString(), null);
+
+            BaseDeDatos.close();
+
+            if (cantidad == 1) {
+                Toast.makeText(this, "La palabra se ha modificado correctamente", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "La palabra no se ha podido modificar", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Debes rellenar todos los campos", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void borrarPalabraSQL(View view) {
+        AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "bdPalabras", null, 1);
+        SQLiteDatabase BaseDeDatos = admin.getWritableDatabase();
 
+        if (!palabraET.equals("") && !descripcionET.equals("")) {
+            int cantidad = BaseDeDatos.delete("tablaPalabras", "nombre = " + palabraET, null);
+            BaseDeDatos.close();
+            borrarCamposPalabra();
+
+            if (cantidad == 1) {
+                Toast.makeText(this, "La palabra se ha borrado correctamente", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "La palabra no existe", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "Debes rellenar todos los campos", Toast.LENGTH_LONG).show();
+        }
     }
 
 }
